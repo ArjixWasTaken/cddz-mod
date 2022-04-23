@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using HarmonyLib;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CloneDroneInTheDangerZone
@@ -40,7 +41,7 @@ namespace CloneDroneInTheDangerZone
     public static class Data
     {
         public static bool HasInfiniteEnergy = false;
-        public static float AimTimeScale = 0.2f;
+        public static float AimTimeScale = 0.1f;
     }
 
     [HarmonyPatch]
@@ -64,11 +65,13 @@ namespace CloneDroneInTheDangerZone
         [HarmonyPatch(typeof(UpgradeManager), "GetUpgrade")]
         static bool GetUpgrade(ref UpgradeDescription __result, UpgradeType upgradeType, int level = 1)
         {
-            for (int i = 0; i < Singleton<UpgradeManager>.Instance.UpgradeDescriptions.Count; i++)
+            ref List<UpgradeDescription> upgradeDescriptions = ref Singleton<UpgradeManager>.Instance.UpgradeDescriptions;
+            for (int i = 0; i < upgradeDescriptions.Count; i++)
             {
-                if (Singleton<UpgradeManager>.Instance.UpgradeDescriptions[i].UpgradeType == upgradeType && Singleton<UpgradeManager>.Instance.UpgradeDescriptions[i].Level == level)
+                UpgradeDescription upgrade = upgradeDescriptions[i];
+                if (upgrade.UpgradeType == upgradeType && upgrade.Level == level)
                 {
-                    __result = Singleton<UpgradeManager>.Instance.UpgradeDescriptions[i];
+                    __result = upgrade;
                     if (__result.UpgradeType == UpgradeType.AimTime)
                     {
                         ((AimTimeUpgrade)__result).NewTimeScale = Data.AimTimeScale;
