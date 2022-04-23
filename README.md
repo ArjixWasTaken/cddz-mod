@@ -6,11 +6,11 @@ It targets the version (5/12/2021), so if it doesn't work, it's probably because
 Current features are:
 - Infinite Energy (can be toggled on/off using Ctrl+J)
 - Get 5 skill points every time you press Ctrl+B
+- Change the AimTime (slowmo) to 0.2, will only work if you have the upgrade.
 
-I disabled the steam integration so you can't use this unfair mod on multiplayer.
+I disabled the steam integration to avoid any Anti-Cheat detection.
 
 Any contributions are welcome.
-
 Big thanks to [BepInEx](https://docs.bepinex.dev/index.html) for existing and making the process of creating a mod enjoyable.
 
 ## Installation
