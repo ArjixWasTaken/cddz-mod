@@ -56,7 +56,7 @@ namespace CloneDroneInTheDangerZone
         }
     }
 
-    [HarmonyPatch(typeof(EnergySource), "Awake")]
+    [HarmonyPatch(typeof(EnergySource), "Consume")]
     class EnergySourcePatches
     {
         [HarmonyPrefix]
