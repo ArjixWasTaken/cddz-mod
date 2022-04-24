@@ -7,6 +7,7 @@ Current features are:
 - Infinite Energy (can be toggled on/off using Ctrl+J)
 - Get 5 skill points every time you press Ctrl+B
 - Change the AimTime (slowmo) to 0.2, will only work if you have the upgrade.
+- Fly! Just press Ctrl+Space and it will launch you up a bit, do that a lot and you can fly!
 
 I disabled the steam integration to avoid any Anti-Cheat detection.
 

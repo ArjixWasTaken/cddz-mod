@@ -43,14 +43,12 @@ namespace CloneDroneInTheDangerZone
                 Logger.LogMessage($"Infinite Energy: {Data.HasInfiniteEnergy}!");
             } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKey(KeyCode.Space))
             {
-                // CharacterTracker.Instance.GetPlayer().GetVelocity()
+                // Similar to the jetpack hack in minecraft.
                 if (Plugin.newTime - Plugin.oldTime > 100)
                 {
                     Plugin.oldTime = Plugin.newTime;
-                    Vector3 vector = new Vector3(0f, 5f, 0f);
-                    CharacterTracker.Instance.GetPlayer().AddVelocity(vector);
+                    CharacterTracker.Instance.GetPlayer().AddVelocity(new Vector3(0f, 5f, 0f));
                 }
-                // Logger.LogMessage("Added 5 y velocity");
             }
         }
 
