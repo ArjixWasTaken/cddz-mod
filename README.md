@@ -21,3 +21,7 @@ Big thanks to [BepInEx](https://docs.bepinex.dev/index.html) for existing and ma
 - Extract the contents of the zip file into the game's directory.
 - Download the dll of this mod from the releases (or you can manually build it)
 - Place the mod's dll into the plugins folder located in the BepInEx directory which in turn is located in the game's directory.
+
+# Showcase
+I made a video featuring my mod, nothing grand but should serve the point!
+<a href="https://www.youtube.com/watch?v=12prqk-PbEU"><img src="https://i3.ytimg.com/vi/12prqk-PbEU/hqdefault.jpg"></a>
