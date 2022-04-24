@@ -43,4 +43,8 @@
       <HintPath>lib\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y C:\Users\Arjix\CloneDroneInTheDangerZone\bin\Debug\net46\CloneDroneInTheDangerZone.dll &quot;C:\Games\Clone Drone in the Danger Zone\steamapps\common\Clone Drone in the Danger Zone\BepInEx\plugins&quot;&#xD;&#xA;&quot;C:\Games\Clone Drone in the Danger Zone\steamapps\common\Clone Drone in the Danger Zone\Clone Drone in the Danger Zone.exe&quot;&#xD;&#xA;SET ERRORLEVEL = 0" />
+  </Target>
 </Project>
