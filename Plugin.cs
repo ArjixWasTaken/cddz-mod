@@ -84,7 +84,6 @@ namespace CloneDroneInTheDangerZone
     class Steam_patcher
     {
         // Disables the steam integration with the game.
-        // TODO: Make this configurable from an options file.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SteamManager), "Initialize")]
         static bool Start(ref bool __result)
