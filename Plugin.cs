@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,31 +10,65 @@ namespace CloneDroneInTheDangerZone
     [BepInProcess("Clone Drone in the Danger Zone.exe")]
     public class Plugin : BaseUnityPlugin
     {
+        public static BepInEx.Logging.ManualLogSource logger;
         private const string modGUID = "com.arjix.cddz.mods";
         private const string modName = "BlaBla";
         private const string modVersion = "69.4.20";
         private readonly Harmony harmony = new Harmony(modGUID);
         private void Awake()
         {
+            Plugin.logger = Logger;
             // Plugin startup logic
             Logger.LogInfo($"Plugin '{modGUID}' is loaded!");
             harmony.PatchAll();
         }
 
+        public static long oldTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        public static long newTime = oldTime;
+
         void Update()
         {
+            Plugin.newTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.B))
             {
                 // Give 5 skill points to the player
                 Singleton<UpgradeManager>.Instance.SetAvailableSkillPoints(
                     Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
                 );
-                Logger.LogInfo("Gave 5 skill points to the player");
+                Logger.LogMessage("Gave 5 skill points to the player");
             } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.J)) {
                 // toggle infinite energy
                 Data.HasInfiniteEnergy = !Data.HasInfiniteEnergy;
                 CharacterTracker.Instance.GetPlayer().GetEnergySource().HasInfiniteEnergy = Data.HasInfiniteEnergy;
-                Logger.LogInfo($"Infinite Energy: {Data.HasInfiniteEnergy}!");
+                Logger.LogMessage($"Infinite Energy: {Data.HasInfiniteEnergy}!");
+            } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKey(KeyCode.Space))
+            {
+                // CharacterTracker.Instance.GetPlayer().GetVelocity()
+                if (Plugin.newTime - Plugin.oldTime > 100)
+                {
+                    Plugin.oldTime = Plugin.newTime;
+                    Vector3 vector = new Vector3(0f, 5f, 0f);
+                    CharacterTracker.Instance.GetPlayer().AddVelocity(vector);
+                }
+                // Logger.LogMessage("Added 5 y velocity");
+            }
+        }
+
+        static Rect windowRect = new(25, 25, 300, 70);
+        void OnGUI()
+        {
+            if (Data.showGUI)
+            {
+                GUILayout.BeginArea(windowRect);
+                if (GUILayout.Button("+5 Skill Points"))
+                {
+                    Singleton<UpgradeManager>.Instance.SetAvailableSkillPoints(
+                        Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
+                    );
+                    Logger.LogMessage("Gave 5 skill points to the player");
+                }
+                Data.HasInfiniteEnergy = GUILayout.Toggle(Data.HasInfiniteEnergy, "Infinite Energy");
+                GUILayout.EndArea();
             }
         }
     }
@@ -42,6 +77,7 @@ namespace CloneDroneInTheDangerZone
     {
         public static bool HasInfiniteEnergy = false;
         public static float AimTimeScale = 0.1f;
+        public static bool showGUI = false;
     }
 
     [HarmonyPatch]
@@ -55,6 +91,26 @@ namespace CloneDroneInTheDangerZone
         {
             __result = true;
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(EscMenu), "Show")]
+    class EscMenuShow
+    {
+        [HarmonyPrefix]
+        static void Show()
+        {
+            Data.showGUI = true;
+        }
+    }
+
+    [HarmonyPatch(typeof(EscMenu), "Hide")]
+    class EscMenuHide
+    {
+        [HarmonyPrefix]
+        static void Hide()
+        {
+            Data.showGUI = false;
         }
     }
 
