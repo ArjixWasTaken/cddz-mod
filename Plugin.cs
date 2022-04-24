@@ -25,10 +25,17 @@ namespace CloneDroneInTheDangerZone
 
         public static long oldTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         public static long newTime = oldTime;
+        public static FirstPersonMover player;
 
         void Update()
         {
             Plugin.newTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            try
+            {
+                player = (FirstPersonMover)CharacterTracker.Instance.GetPlayer();
+            }
+            catch (Exception e) { }
+
             if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.B))
             {
                 // Give 5 skill points to the player
@@ -39,7 +46,7 @@ namespace CloneDroneInTheDangerZone
             } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.J)) {
                 // toggle infinite energy
                 Data.HasInfiniteEnergy = !Data.HasInfiniteEnergy;
-                CharacterTracker.Instance.GetPlayer().GetEnergySource().HasInfiniteEnergy = Data.HasInfiniteEnergy;
+                player.GetEnergySource().HasInfiniteEnergy = Data.HasInfiniteEnergy;
                 Logger.LogMessage($"Infinite Energy: {Data.HasInfiniteEnergy}!");
             } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKey(KeyCode.Space))
             {
@@ -47,7 +54,14 @@ namespace CloneDroneInTheDangerZone
                 if (Plugin.newTime - Plugin.oldTime > 100)
                 {
                     Plugin.oldTime = Plugin.newTime;
-                    CharacterTracker.Instance.GetPlayer().AddVelocity(new Vector3(0f, 5f, 0f));
+                    player.AddVelocity(new Vector3(0f, 5f, 0f));
+                }
+            } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.E))
+            {
+                Character target = Singleton<CharacterTracker>.Instance.GetClosestLivingEnemyCharacter(player.transform.position);
+                if (target != null)
+                {
+                    target.Kill((Character)player, DamageSourceType.EnergyBeam);
                 }
             }
         }
