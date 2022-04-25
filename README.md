@@ -9,6 +9,7 @@ Current features are:
 - Change the AimTime (slowmo) to 0.2, will only work if you have the upgrade.
 - Fly! Just press Ctrl+Space and it will launch you up a bit, do that a lot and you can fly!
 - Kill nearest enemy by pressing Ctrl+E!
+- Timestop! Disables all the enemy AIs. (the keybind is Ctrl+T)
 
 I disabled the steam integration to avoid any Anti-Cheat detection.
 

@@ -26,11 +26,13 @@ namespace CloneDroneInTheDangerZone
         {
             Plugin.logger = Logger;
 
+            // Register all the keybinds
             keybindsUp.Add(KeyCode.B, AddFiveSP);
             keybindsUp.Add(KeyCode.J, ToggleInfiniteEnergy);
             keybindsUp.Add(KeyCode.E, KillClosestEnemy);
+            keybindsUp.Add(KeyCode.T, ToggleTimestop);
 
-            keybindsDown.Add(KeyCode.Space, Fly);            
+            keybindsDown.Add(KeyCode.Space, Fly);
 
             harmony.PatchAll();
             Logger.LogInfo($"Plugin '{modGUID}' is loaded!");
@@ -39,8 +41,8 @@ namespace CloneDroneInTheDangerZone
         private void AddFiveSP()
         {
             Singleton<UpgradeManager>.Instance.SetAvailableSkillPoints(
-                        Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
-                    );
+                Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
+            );
             Logger.LogMessage("Gave 5 skill points to the player");
         }
 
@@ -49,6 +51,18 @@ namespace CloneDroneInTheDangerZone
             Data.HasInfiniteEnergy = !Data.HasInfiniteEnergy;
             player.GetEnergySource().HasInfiniteEnergy = Data.HasInfiniteEnergy;
             Logger.LogMessage($"Infinite Energy: {Data.HasInfiniteEnergy}!");
+        }
+
+        private void ToggleTimestop()
+        {
+            if (Data.TimestopEnabled)
+            {
+                Singleton<AIManager>.Instance.DeactivateEnemyAI();
+            } else
+            {
+                Singleton<AIManager>.Instance.ActivateEnemyAI();
+            }
+            Data.TimestopEnabled = !Data.TimestopEnabled;
         }
 
         private void Fly()
@@ -92,7 +106,6 @@ namespace CloneDroneInTheDangerZone
 
                 foreach (KeyValuePair<KeyCode, Action> keybind in keybindsDown)
                 {
-
                     if (Input.GetKey(keybind.Key))
                     {
                         keybind.Value();
@@ -111,6 +124,10 @@ namespace CloneDroneInTheDangerZone
                 {
                     AddFiveSP();
                 }
+                if (GUILayout.Button("Toggle timestop"))
+                {
+                    ToggleTimestop();
+                }
                 Data.HasInfiniteEnergy = GUILayout.Toggle(Data.HasInfiniteEnergy, "Infinite Energy");
                 GUILayout.EndArea();
             }
@@ -120,8 +137,9 @@ namespace CloneDroneInTheDangerZone
     public static class Data
     {
         public static bool HasInfiniteEnergy = false;
-        public static float AimTimeScale = 0.1f;
+        public static float AimTimeScale = 0.05f;
         public static bool showGUI = false;
+        public static bool TimestopEnabled = false;
     }
 
     [HarmonyPatch]
@@ -137,23 +155,23 @@ namespace CloneDroneInTheDangerZone
         }
     }
 
-    [HarmonyPatch(typeof(EscMenu), "Show")]
-    class EscMenuShow
+    [HarmonyPatch]
+    class EscMenuHook
     {
         [HarmonyPrefix]
-        static void Show()
+        [HarmonyPatch(typeof(EscMenu), "Show")]
+        static bool Show()
         {
             Data.showGUI = true;
+            return true;
         }
-    }
 
-    [HarmonyPatch(typeof(EscMenu), "Hide")]
-    class EscMenuHide
-    {
         [HarmonyPrefix]
-        static void Hide()
+        [HarmonyPatch(typeof(EscMenu), "Hide")]
+        static bool Hide()
         {
             Data.showGUI = false;
+            return true;
         }
     }
 
@@ -187,7 +205,7 @@ namespace CloneDroneInTheDangerZone
     class EnergySourcePatches
     {
         [HarmonyPrefix]
-        static void setInfiniteEnergyRef(ref bool ___HasInfiniteEnergy)
+        static void Consume(ref bool ___HasInfiniteEnergy)
         {
             ___HasInfiniteEnergy = Data.HasInfiniteEnergy;
         }
