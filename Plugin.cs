@@ -15,53 +15,88 @@ namespace CloneDroneInTheDangerZone
         private const string modName = "BlaBla";
         private const string modVersion = "69.4.20";
         private readonly Harmony harmony = new Harmony(modGUID);
-        private void Awake()
-        {
-            Plugin.logger = Logger;
-            // Plugin startup logic
-            Logger.LogInfo($"Plugin '{modGUID}' is loaded!");
-            harmony.PatchAll();
-        }
+        
+        private static Dictionary<KeyCode, Action> keybindsUp = new();
+        private static Dictionary<KeyCode, Action> keybindsDown = new();
 
         public static long oldTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         public static long newTime = oldTime;
+
+        private void Awake()
+        {
+            Plugin.logger = Logger;
+
+            keybindsUp.Add(KeyCode.B, AddFiveSP);
+            keybindsUp.Add(KeyCode.J, ToggleInfiniteEnergy);
+            keybindsUp.Add(KeyCode.E, KillClosestEnemy);
+
+            keybindsDown.Add(KeyCode.Space, Fly);            
+
+            harmony.PatchAll();
+            Logger.LogInfo($"Plugin '{modGUID}' is loaded!");
+        }
+
+        private void AddFiveSP()
+        {
+            Singleton<UpgradeManager>.Instance.SetAvailableSkillPoints(
+                        Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
+                    );
+            Logger.LogMessage("Gave 5 skill points to the player");
+        }
+
+        private void ToggleInfiniteEnergy()
+        {
+            Data.HasInfiniteEnergy = !Data.HasInfiniteEnergy;
+            player.GetEnergySource().HasInfiniteEnergy = Data.HasInfiniteEnergy;
+            Logger.LogMessage($"Infinite Energy: {Data.HasInfiniteEnergy}!");
+        }
+
+        private void Fly()
+        {
+            if (newTime - oldTime > 100)
+            {
+                oldTime = newTime;
+                player.AddVelocity(new Vector3(0f, 5f, 0f));
+            }
+        }
+
+        private void KillClosestEnemy()
+        {
+            Character target = Singleton<CharacterTracker>.Instance.GetClosestLivingEnemyCharacter(player.transform.position);
+            if (target != null)
+            {
+                target.Kill((Character)player, DamageSourceType.EnergyBeam);
+            }
+        }
+
         public static FirstPersonMover player;
 
         void Update()
         {
-            Plugin.newTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            newTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             try
             {
                 player = (FirstPersonMover)CharacterTracker.Instance.GetPlayer();
             }
             catch (Exception e) { }
 
-            if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.B))
+            if (Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl))
             {
-                // Give 5 skill points to the player
-                Singleton<UpgradeManager>.Instance.SetAvailableSkillPoints(
-                    Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
-                );
-                Logger.LogMessage("Gave 5 skill points to the player");
-            } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.J)) {
-                // toggle infinite energy
-                Data.HasInfiniteEnergy = !Data.HasInfiniteEnergy;
-                player.GetEnergySource().HasInfiniteEnergy = Data.HasInfiniteEnergy;
-                Logger.LogMessage($"Infinite Energy: {Data.HasInfiniteEnergy}!");
-            } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKey(KeyCode.Space))
-            {
-                // Similar to the jetpack hack in minecraft.
-                if (Plugin.newTime - Plugin.oldTime > 100)
+                foreach (KeyValuePair<KeyCode, Action> keybind in keybindsUp)
                 {
-                    Plugin.oldTime = Plugin.newTime;
-                    player.AddVelocity(new Vector3(0f, 5f, 0f));
+                    if (Input.GetKeyUp(keybind.Key))
+                    {
+                        keybind.Value();
+                    }
                 }
-            } else if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyUp(KeyCode.E))
-            {
-                Character target = Singleton<CharacterTracker>.Instance.GetClosestLivingEnemyCharacter(player.transform.position);
-                if (target != null)
+
+                foreach (KeyValuePair<KeyCode, Action> keybind in keybindsDown)
                 {
-                    target.Kill((Character)player, DamageSourceType.EnergyBeam);
+
+                    if (Input.GetKey(keybind.Key))
+                    {
+                        keybind.Value();
+                    }
                 }
             }
         }
@@ -74,10 +109,7 @@ namespace CloneDroneInTheDangerZone
                 GUILayout.BeginArea(windowRect);
                 if (GUILayout.Button("+5 Skill Points"))
                 {
-                    Singleton<UpgradeManager>.Instance.SetAvailableSkillPoints(
-                        Singleton<UpgradeManager>.Instance.GetAvailableSkillPoints() + 5
-                    );
-                    Logger.LogMessage("Gave 5 skill points to the player");
+                    AddFiveSP();
                 }
                 Data.HasInfiniteEnergy = GUILayout.Toggle(Data.HasInfiniteEnergy, "Infinite Energy");
                 GUILayout.EndArea();
