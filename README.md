@@ -21,7 +21,7 @@ Big thanks to [BepInEx](https://docs.bepinex.dev/index.html) for existing and ma
 
 - Download the 32bit build of BepInEx [here](https://github.com/BepInEx/BepInEx/releases/download/v5.4.19/BepInEx_x86_5.4.19.0.zip)
 - Extract the contents of the zip file into the game's directory.
-- Download the dll of this mod from the releases (or you can manually build it)
+- Download the dll of this mod from the latest [release](https://github.com/ArjixWasTaken/cddz-mod/releases/latest) (or you can manually build it)
 - Place the mod's dll into the plugins folder located in the BepInEx directory which in turn is located in the game's directory.
 
 # Showcase
