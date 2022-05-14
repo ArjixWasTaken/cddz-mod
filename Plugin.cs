@@ -271,7 +271,7 @@ namespace CloneDroneInTheDangerZone
         static bool Initialize(ref bool __result)
         {
             __result = true;
-            return false;
+            return true;
         }
     }
 
